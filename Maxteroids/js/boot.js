@@ -1,141 +1,43 @@
-var gameStart = false;
-var cursors;
-var MaxRocks = 100;
-var BigRock = 500;
-var SmallRock = 200;
-var NumParticles = 10;
-var ShipExplodeCount = 250;
-var DebugMode = false;
-
-var Score;
+var MAXENEMIES = 100;
+var MAXROCKS = 100;
+var BIGROCK = 50;
+var SMALLROCK = 20;
+var NumRocks = 5;
+var NumParticles = 5;
+var ShipExplodeCount = 100;
+var NumEnemies = 5;
+var ShipSize = 30;
+//var shipPic;
+var gameOverText;
+var gameOver = false;
+var Score=0;
+var HighScore=0;
 var RocksLeft;
 var ShipsLeft;
-var BulletsLoose;
-var da;
-var db;
-var Pie;
-var bulletup;
-var TurnLeft = false;
-var TurnRight = false;
-var Firing = false;
-var ReallyFiring = false;
-var RefreshWin = false;
-var Radians;
-var BaseStart;
-var BaseEnd;
-var Direction;
-var Level;
-var NumEnemy;
-//Ship
+var gameStart = false;
+var introTextSize = .01;
+var introText;
+var introText2;
+var spaceKey;
+var leftKey;
+var rightKey;
+var upKey;
+var downKey;
 var MainShip;
-var Enemy = [];
+var Enemies = [];
 var Explosion = [];
 var Particles = [];
-var rocks = [];
-var bullet = [];
-var NumRocks, RockNumStart;
-
-var Score;
-var RocksLeft;
-var ShipsLeft;
-var BulletsLoose;
-var da;
-var db;
-var Pie;
-var bulletup;
-var TurnLeft = false;
-var TurnRight = false;
-var Firing = false;
-var ReallyFiring = false;
-var RefreshWin = false;
-var Radians;
-var BaseStart;
-var BaseEnd;
-var Direction;
-var Level;
-var NumEnemy;
-
-
-function Ship() {
-  this.Active = true;
-  this.Color = 0;
-  this.cx = 0;
-  this.cy = 0;
-  this.exploding = false;
-  this.explodeSwitch = false;
-  this.explodeCount = 0;
-  this.Firing = false;
-  this.Forward = false;
-  this.OldCX = 0;
-  this.OldCY = 0;
-  this.x = [];
-  this.Y = [];
-  this.Speed = 0;
-  this.ShieldStrength = 0;
-  this.Shields = false;
-  this.Size = 0;
-  this.xv = 0;
-  this.yv = 0;
-  this.ParticleX = [];
-  this.ParticleY = [];
-  this.ParticleXSpeed = [];
-  this.ParticleYSpeed = [];
-  this.ParticleSize  = [];
-  this.ParticleColor = [];
-  //Dim ShipParticle(NumParticles) As Particle
-  //Dim RockParticle(NumParticles) As Particle
-  //Dim EnemyParticle(NumParticles) As Particle
-}
-
-function Explosion() {
-  this.BlowDirection = 0;
-  this.exploding = false;
-  this.explodeSwitch = false;
-  this.ExplodeCount = 0;
-  this.BlowX = [];
-  this.BlowY = [];
-  this.BlowCenterX = [];
-  this.BlowCenterY = [];
-  this.BlowVelocityX = [];
-  this.BlowVelocityY = [];
-  this.Size = 0;
-  this.Color = 0;
-}
-
-function Particle() {
-  this.x = 0;
-  this.Y = 0;
-  this.xspeed = 0;
-  this.yspeed = 0;
-  this.Size = 0;
-  this.Color = 0;
-}
-/*
-Private Type Rock
-Active As Boolean
-X As Double
-Y As Double
-RockDirection As Double
-PointX(12) As Integer
-PointY(12) As Integer
-PointXDist(12) As Integer
-PointYDist(12) As Integer
-Rotate As Double
-Size As Integer
-xv As Integer
-yv As Integer
-Hit As Integer
-End Type
-Private Type BulletData
-Active As Boolean
-DistanceMoved As Integer
-bulletx As Double
-bullety As Double
-bulletxv As Double
-bulletyv As Double
-BulletDirection As Double
-Counter As Integer
-Pulse As Integer
-type As Integer
-End Type
-*/
+var Rocks = [];
+var Bullets = [];
+var EnemyBullets = [];
+var Pie = 3.14159265358979;
+var Radians = (2 * Pie) / 360;
+var shipLine = [];
+var bulletLine = [];
+ var enemyBulletLine = [];
+var enemyLine = [];
+var ShipsLeft = 5;
+var RockNumStart = 4;
+var Level = 1;
+var infoText2;
+var bulletup = 1;
