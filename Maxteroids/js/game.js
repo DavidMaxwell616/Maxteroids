@@ -102,6 +102,17 @@ function Fire(){
     drawShip();
   }
 }
+function degtorad(angle) {
+  return 3.1415926 * angle / 180;
+}
+    
+function rotx(x,y,angle) {
+  return (x*Math.cos(angle)) - (y*Math.sin(angle));
+}
+
+function roty(x,y,angle) {
+  return (x*Math.sin(angle)) + (y*Math.cos(angle));
+}
 
 function initShip(){
   player.x = width/2;
@@ -110,29 +121,29 @@ function initShip(){
   player.speed = 0.1;
   player.velX = 0;
   player.velY = 0;
-  player.rotateSpeed = 0.001;
+  player.rotateSpeed = 0.1;
   player.radius = 15;
   player.angle = 0;
+  player.shape = new Phaser.Geom.Polygon(playerShape);
+ 
 }
 
 function drawShip(){
-  var shape = new Phaser.Geom.Polygon(playerShape);
     graphics.lineStyle(2, 0xffffff);
     graphics.beginPath();
-   let radians = player.angle / Math.PI * 180;
-       
-   graphics.moveTo(player.x+shape.points[0].x* Math.cos(radians), player.y+shape.points[0].y*Math.sin(radians));
-   for (var i = 1; i < shape.points.length; i++)
-    {
-        graphics.lineTo(player.x+shape.points[i].x* Math.cos(radians), player.y+shape.points[i].y*Math.sin(radians));
+
+  var i = 0;
+  var x = rotx(player.shape.points[i].x, player.shape.points[i].y, player.angle) + player.x;
+  var y = roty(player.shape.points[i].x, player.shape.points[i].y, player.angle) + player.y;
+   graphics.moveTo(x, y);
+   for (i = 1; i < player.shape.points.length; i++) {
+    x = rotx(player.shape.points[i].x, player.shape.points[i].y, player.angle) + player.x;
+    y = roty(player.shape.points[i].x, player.shape.points[i].y, player.angle) + player.y;
+      graphics.lineTo(x, y);
     }
 
-  //   for (let i = 0; i < 3; i++) {
-  //     ctx.lineTo(this.x - this.radius * Math.cos(vertAngle * i + radians), this.y - this.radius * Math.sin(vertAngle * i + radians));
-  // }
     graphics.closePath();
     graphics.strokePath();
-    player.shape = shape;
 }
 
 function UpdatePlayer(){
