@@ -26,7 +26,7 @@ var leftKey;
 var rightKey;
 var upKey;
 var downKey;
-var player;
+var ship = {};
 // var Enemies = [];
 // var Explosion = [];
 // var Particles = [];
@@ -44,7 +44,7 @@ var infoText2;
 var bulletup = 1;
 var player = {};
 
-var playerShape = [
+var shipShape = [
   { x: 18,  y: 0},
   { x: -18, y: -12},
   { x: -10, y: -8},
