@@ -42,7 +42,7 @@ var ship = {};
 var Level = 1;
 var infoText2;
 var bulletup = 1;
-var player = {};
+var ship = {};
 
 var shipShape = [
   { x: 18,  y: 0},
@@ -51,6 +51,21 @@ var shipShape = [
   { x: -10, y: 8},
   { x: -18, y: 12},
 ]
+
+const rockShape = [
+  { x: 0,  y: 25},
+  { x:  13,  y: 9},
+  { x:  22,  y: 12},
+  { x:  22,  y: 0},
+  { x:  41,  y: 8},
+  { x:  50,  y: 27},
+  { x:  43,  y: 43},
+  { x:  33,  y: 50},
+  { x:  13,  y: 44},
+  { x:  8,  y: 35},
+  { x:  16,  y: 28}
+]
+
 const  introTextString = "Rotate Right - Right Arrow \n" +
 "Rotate Left - Left Arrow \n" +
 "Thrust - Up Arrow \n" +

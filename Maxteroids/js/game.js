@@ -130,17 +130,19 @@ bullet.velY = 0;
       graphics.fillRect(bullet.x,bullet.y,bullet.width,bullet.height);
 }
 
-function initAsteroid(asteroid, x,y,radius,level,collisionRadius){
+function initAsteroid(){
+      var asteroid = {};
       asteroid.visible = true;
-      asteroid.x = x || Phaser.Math.Between(0, width);
-      asteroid.y = y || Phaser.Math.Between(0, height);
+      asteroid.x = Phaser.Math.Between(0, width);
+      asteroid.y = Phaser.Math.Between(0, height);
       asteroid.speed = 3;
-      asteroid.radius = radius || 50;
+      asteroid.radius = 50;
       asteroid.angle = Math.floor(Math.random() * 359);
       asteroid.strokeColor = 'white';
-      asteroid.collisionRadius = collisionRadius || 46;
+      asteroid.collisionRadius = 46;
       // Used to decide if this asteroid can be broken into smaller pieces
-      asteroid.level = level || 1;  
+      asteroid.level = 1;  
+      return asteroid;
   }
 
 function updateAsteroid(asteroid){
@@ -190,7 +192,7 @@ function drawLifeShips(){
       let vertAngle = ((Math.PI * 2) / 6);
       var radians = asteroid.angle / Math.PI * 180;
       for(let i = 0; i < 6; i++){
-          ctx.lineTo(asteroid.x - asteroid.radius * Math.cos(vertAngle * i + radians), 
+        graphics.lineTo(asteroid.x - asteroid.radius * Math.cos(vertAngle * i + radians), 
           asteroid.y - asteroid.radius * Math.sin(vertAngle * i + radians));
       }
       graphics.closePath();
@@ -320,8 +322,8 @@ function update(){
     }
     if (asteroids.length !== 0) {
       for(let j = 0; j < asteroids.length; j++){
-          updateAsteroid(asteroid[j]);
-          drawAsteroid(asteroid[j]);
+          updateAsteroid(asteroids[j]);
+          drawAsteroid(asteroids[j]);
       }
 }
 }
