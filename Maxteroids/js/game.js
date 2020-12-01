@@ -135,32 +135,40 @@ function initAsteroid(){
       asteroid.visible = true;
       asteroid.x = Phaser.Math.Between(0, width);
       asteroid.y = Phaser.Math.Between(0, height);
-      asteroid.speed = 3;
+      asteroid.speed = .3;
       asteroid.radius = 50;
       asteroid.angle = Math.floor(Math.random() * 359);
+      asteroid.velX = Phaser.Math.Between(1, 3);
+      asteroid.velY = Phaser.Math.Between(1, 3);
+      if(Phaser.Math.Between(0, 1)==1)
+      asteroid.velX*=-1;
+      if(Phaser.Math.Between(0, 1)==1)
+      asteroid.velY*=-1;
       asteroid.strokeColor = 'white';
       asteroid.collisionRadius = 46;
+      asteroid.rotateSpeed = Phaser.Math.Between(1, 10)/100;
+      asteroid.shape = new Phaser.Geom.Polygon(rockShape);
       // Used to decide if this asteroid can be broken into smaller pieces
       asteroid.level = 1;  
       return asteroid;
   }
 
 function updateAsteroid(asteroid){
-      let radians = asteroid.angle / Math.PI * 180;
-      asteroid.x += Math.cos(radians) * asteroid.speed;
-      asteroid.y += Math.sin(radians) * asteroid.speed;
-      if (asteroid.x < asteroid.radius) {
-          asteroid.x = width;
+      asteroid.x += asteroid.velX;
+      asteroid.y += asteroid.velY;
+      if (asteroid.x < 0-asteroid.radius) {
+          asteroid.x = width+asteroid.radius;
       }
-      if (asteroid.x > width) {
-          asteroid.x = asteroid.radius;
+      if (asteroid.x > width+asteroid.radius) {
+          asteroid.x = 0-asteroid.radius;
       }
-      if (asteroid.y < asteroid.radius) {
-          asteroid.y = height;
+      if (asteroid.y < 0-asteroid.radius) {
+          asteroid.y = height+asteroid.radius;
       }
-      if (asteroid.y > height) {
-          asteroid.y = asteroid.radius;
+      if (asteroid.y > height+asteroid.radius) {
+          asteroid.y = 0-asteroid.radius;
       }
+      
   }
 // Handles drawing life ships on screen
 function drawLifeShips(){
@@ -188,16 +196,32 @@ function drawLifeShips(){
   }
 }
  function drawAsteroid(asteroid){
+      // graphics.beginPath();
+      // let vertAngle = ((Math.PI * 2) / 6);
+      // var radians = asteroid.angle / Math.PI * 180;
+      // for(let i = 0; i < 6; i++){
+      //   graphics.lineTo(asteroid.x - asteroid.radius * Math.cos(vertAngle * i + radians), 
+      //     asteroid.y - asteroid.radius * Math.sin(vertAngle * i + radians));
+      // }
+      // graphics.closePath();
+      // graphics.stroke();
+      asteroid.angle+=asteroid.rotateSpeed;
+      graphics.lineStyle(2, 0xffffff);
       graphics.beginPath();
-      let vertAngle = ((Math.PI * 2) / 6);
-      var radians = asteroid.angle / Math.PI * 180;
-      for(let i = 0; i < 6; i++){
-        graphics.lineTo(asteroid.x - asteroid.radius * Math.cos(vertAngle * i + radians), 
-          asteroid.y - asteroid.radius * Math.sin(vertAngle * i + radians));
+  
+    var i = 0;
+    var x = rotx(asteroid.shape.points[i].x, asteroid.shape.points[i].y, asteroid.angle) + asteroid.x;
+    var y = roty(asteroid.shape.points[i].x, asteroid.shape.points[i].y, asteroid.angle) + asteroid.y;
+     graphics.moveTo(x, y);
+     for (i = 1; i < asteroid.shape.points.length; i++) {
+      x = rotx(asteroid.shape.points[i].x, asteroid.shape.points[i].y, asteroid.angle) + asteroid.x;
+      y = roty(asteroid.shape.points[i].x, asteroid.shape.points[i].y, asteroid.angle) + asteroid.y;
+        graphics.lineTo(x, y);
       }
+  
       graphics.closePath();
-      graphics.stroke();
-  }
+      graphics.strokePath();
+      }
 
   function CircleCollision(p1x, p1y, r1, p2x, p2y, r2){
     let radiusSum;
@@ -260,13 +284,9 @@ function drawShip(){
     graphics.strokePath();
 }
 
-// function Thrust(){
-//   ship.movingForward = true;
-// }
 
 function updateShip(){
         let radians = ship.angle / Math.PI * 180;
- 
         if (ship.movingForward) {
             ship.velX += Math.cos(radians) * ship.speed;
             ship.velY += Math.sin(radians) * ship.speed;
@@ -314,7 +334,6 @@ function update(){
       graphics.clear();
       updateShip();
       if (bullets.length > 0) {
-        console.log(bullets.length);
         for(let i = 0; i < bullets.length; i++){
             updateBullet(bullets[i]);
             drawBullet(bullets[i]);
@@ -322,8 +341,8 @@ function update(){
     }
     if (asteroids.length !== 0) {
       for(let j = 0; j < asteroids.length; j++){
-          updateAsteroid(asteroids[j]);
           drawAsteroid(asteroids[j]);
+          updateAsteroid(asteroids[j]);
       }
 }
 }
