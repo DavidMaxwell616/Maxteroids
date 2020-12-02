@@ -8,6 +8,7 @@ var config = {
       update: update
   }
 };
+
 var game = new Phaser.Game(config);
 var _scene;
 var width = game.config.width;
@@ -115,20 +116,33 @@ bullet.angle = ship.angle;
 bullet.height = 4;
 bullet.width = 4;
 bullet.speed = 5;
-bullet.velX = 0;
-bullet.velY = 0;
-  }
+bullet.color = 0xffffff;
+bullet.bullet= _scene.add.rectangle(bullet.x,bullet.y,bullet.width,bullet.height,bullet.color);
+bullet.velX =  Math.cos(bullet.angle) * bullet.speed;
+bullet.velY = Math.sin(bullet.angle) * bullet.speed;
+}
 
  function updateBullet(bullet){
-      let radians = bullet.angle / Math.PI * 180;
-      bullet.x -= Math.cos(radians) * bullet.speed;
-      bullet.y -= Math.sin(radians) * bullet.speed;
+       bullet.x +=  bullet.velX;
+      bullet.y +=bullet.velY;
+      if (bullet.x < 0 || bullet.x > width || bullet.y < 0 || bullet.y > height)
+      {bullet.x=ship.x;
+      bullet.y=ship.y;
+      bullet.visible = false;
+      bullet.color=0x000000;
+      bullet.velX=0;
+      bullet.velY   =0;
+      }
   }
 
   function drawBullet(bullet){
-      graphics.fillStyle = 'white';
+    
+    graphics.lineStyle(2,bullet.color);
+      graphics.beginPath();
       graphics.fillRect(bullet.x,bullet.y,bullet.width,bullet.height);
-}
+        graphics.closePath();
+        graphics.strokePath();
+     }
 
 function initAsteroid(){
       var asteroid = {};
@@ -196,15 +210,6 @@ function drawLifeShips(){
   }
 }
  function drawAsteroid(asteroid){
-      // graphics.beginPath();
-      // let vertAngle = ((Math.PI * 2) / 6);
-      // var radians = asteroid.angle / Math.PI * 180;
-      // for(let i = 0; i < 6; i++){
-      //   graphics.lineTo(asteroid.x - asteroid.radius * Math.cos(vertAngle * i + radians), 
-      //     asteroid.y - asteroid.radius * Math.sin(vertAngle * i + radians));
-      // }
-      // graphics.closePath();
-      // graphics.stroke();
       asteroid.angle+=asteroid.rotateSpeed;
       graphics.lineStyle(2, 0xffffff);
       graphics.beginPath();
@@ -286,10 +291,9 @@ function drawShip(){
 
 
 function updateShip(){
-        let radians = ship.angle / Math.PI * 180;
         if (ship.movingForward) {
-            ship.velX += Math.cos(radians) * ship.speed;
-            ship.velY += Math.sin(radians) * ship.speed;
+            ship.velX += Math.cos(ship.angle) * ship.speed;
+            ship.velY += Math.sin(ship.angle) * ship.speed;
         }
 
         if (ship.x < ship.radius) {
@@ -306,13 +310,13 @@ function updateShip(){
         }
 
          // Slow ship speed when not holding key
-         this.velX *= 0.99;
-         this.velY *= 0.99;
+         ship.velX *= 0.99;
+         ship.velY *= 0.99;
   
          // Change value of x & y while accounting for
          // air friction    
-         this.x -= this.velX;
-         this.y -= this.velY;
+         ship.x += ship.velX;
+         ship.y += ship.velY;
         drawShip();
 
       }
@@ -344,6 +348,12 @@ function update(){
           drawAsteroid(asteroids[j]);
           updateAsteroid(asteroids[j]);
       }
+}
+if (bullets.length !== 0) {
+  for(let i = 0; i < bullets.length; i++){
+      updateBullet(bullets[i]);
+      drawBullet(bullets[i]);
+  }
 }
 }
 }
