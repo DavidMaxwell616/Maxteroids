@@ -271,8 +271,8 @@ function roty(x,y,angle) {
 }
 
 function initShip(){
-  ship.x = width/2;
-  ship.y = height/2;  
+  ship.x = game.width/2;
+  ship.y = game.height/2;  
   ship.movingForward = false;
   ship.speed = 0.1;
   ship.velX = 0;
@@ -334,19 +334,6 @@ function updateShip(){
   }
 
 function update(){
-  introText.scale.x = introTextSize;
-  introText.scale.y = introTextSize;
-  if (introTextSize < 1){
-    introText.y -= 1;
-    introTextSize += .01;
-  }
-  else {
-      introText2.visible = true;
-  }
-}
-
-
-function updateX(){
   graphics.clear();
 
 
@@ -369,8 +356,8 @@ function updateX(){
 }
 
     if (!gameStart) {
-        introText.scaleX= introTextSize;
-        introText.scaleY= introTextSize;
+        introText.scale.x= introTextSize;
+        introText.scale.y= introTextSize;
         if (introTextSize < 1){
           introText.y -= 3;
           introTextSize += .03;
