@@ -45,11 +45,12 @@ var bulletup = 1;
 var ship = {};
   
 var shipShape = [
-  { x: 18,  y: 0},
-  { x: -18, y: -12},
-  { x: -10, y: -8},
-  { x: -10, y: 8},
-  { x: -18, y: 12},
+  { x: 12,  y: 0},
+  { x: -13, y: -8},
+  { x: -10, y: -6},
+  { x: -10, y: 6},
+  { x: -13, y: 8},
+  { x: 14,  y: 0}
 ]
 
 const rockShape = [
@@ -63,7 +64,8 @@ const rockShape = [
   { x:  16,  y: 50},
   { x:  -34,  y: 38},
   { x:  -34,  y: 20},
-  { x:  -12,  y: 6}
+  { x:  -12,  y: 6},
+  { x: -50,  y: 0}
 ]
 
 const  introTextString = "Rotate Right - Right Arrow \n" +

@@ -1,22 +1,20 @@
-const game = new Phaser.Game(500, 500, Phaser.ARCADE, 'game', {
-  create,
-  update,
-});
-
+var game = new Phaser.Game(600, 600, 
+  Phaser.AUTO, 'phaser-example', { create: create, update: update });
 
 function create ()
 {
-  graphics = game.add.graphics(game.width, game.height);
-  graphics.beginFill(0xFF3300);
-  graphics.lineStyle(10, 0xffd900, 1);
+  graphics = game.add.graphics(0, 0);
+
   if (localStorage.getItem(localStorageName) == null)
     highScore = 0;
  else 
     highScore = localStorage.getItem(localStorageName);
 
 showTitle();
+
 game.cursors = game.input.keyboard.createCursorKeys();
 game.fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+window.graphics = graphics;
 
 }
 
@@ -26,10 +24,10 @@ function startGame(){
   initShip();
   drawShip();
   
-  // for(let i = 0; i < 8; i++){
-  // var asteroid = initAsteroid();
-  //   asteroids.push(asteroid);
-  // }
+  for(let i = 0; i < 8; i++){
+  var asteroid = initAsteroid();
+    asteroids.push(asteroid);
+  }
 }
 
 
@@ -53,8 +51,8 @@ function Rotate(dir) {
 }
 
 function Hyperspace(){
-ship.x = Phaser.Math.Between(0, width);
-ship.y = Phaser.Math.Between(0, height);
+ship.x = game.rnd.integerInRange(0, game.width);
+ship.y = game.rnd.integerInRange(0, game.height);
 }
 
 function initBullet(bullet){
@@ -66,7 +64,7 @@ bullet.width = 4;
 bullet.speed = 5;
 bullet.color = 0xffffff;
 bullet.life = 100;
-bullet.shape= _scene.add.rectangle(bullet.x,bullet.y,bullet.width,bullet.height,bullet.color);
+bullet.shape= graphics.drawRect(bullet.x,bullet.y,bullet.width,bullet.height,bullet.color);
 bullet.velX =  Math.cos(bullet.angle) * bullet.speed;
 bullet.velY = Math.sin(bullet.angle) * bullet.speed;
 }
@@ -78,49 +76,48 @@ bullet.velY = Math.sin(bullet.angle) * bullet.speed;
   bullet.x +=  bullet.velX;
   bullet.y +=bullet.velY;
   if (bullet.x < 0)
-    bullet.x = width;
-  if (bullet.x > width)
+    bullet.x = game.width;
+  if (bullet.x > game.width)
     bullet.x = 0;
   if(bullet.y < 0)
-    bullet.y = height;
-  if(bullet.y > height)
+    bullet.y = game.height;
+  if(bullet.y > game.height)
     bullet.y = 0;
   asteroids.forEach(asteroid => {
   if(CircleCollision(bullet.x,bullet.y,bullet.radius,asteroid.x,asteroid.y,asteroid.radius))
   console.log('hit');
 });
-console.log(bullet.life)
   if(bullet.life==0){
     bullets.pop(bullet);
-bullet=null;
+    bullet=null;
   }
   }
 
 function drawBullet(bullet){
   if(bullet!=undefined && bullet.shape!=null)
   {   
-    bullet.shape.setStrokeStyle(1, bullet.color);
+    graphics.drawRect(bullet.x,bullet.y,bullet.width,bullet.height,bullet.color);
   }
 }
 
 function initAsteroid(){
       var asteroid = {};
       asteroid.visible = true;
-      asteroid.x = Phaser.Math.Between(0, width);
-      asteroid.y = Phaser.Math.Between(0, height);
+      asteroid.x = game.rnd.integerInRange(0, game.width);
+      asteroid.y = game.rnd.integerInRange(0, game.height);
       asteroid.speed = .3;
       asteroid.radius = 50;
-      asteroid.angle = Math.floor(Math.random() * 359);
-      asteroid.velX = Phaser.Math.Between(1, 3);
-      asteroid.velY = Phaser.Math.Between(1, 3);
-      if(Phaser.Math.Between(0, 1)==1)
+      asteroid.angle = game.rnd.integerInRange(0, 359);
+      asteroid.velX = game.rnd.integerInRange(1, 3);
+      asteroid.velY = game.rnd.integerInRange(1, 3);
+      if(game.rnd.integerInRange(0, 1)==1)
       asteroid.velX*=-1;
-      if(Phaser.Math.Between(0, 1)==1)
+      if(game.rnd.integerInRange(0, 1)==1)
       asteroid.velY*=-1;
       asteroid.strokeColor = 'white';
       asteroid.collisionRadius = 46;
-      asteroid.rotateSpeed = Phaser.Math.Between(1, 10)/100;
-      asteroid.shape = new Phaser.Geom.Polygon(rockShape);
+      asteroid.rotateSpeed = game.rnd.integerInRange(1, 10)/100;
+      asteroid.shape = new Phaser.Polygon(rockShape);
       // Used to decide if this asteroid can be broken into smaller pieces
       asteroid.level = 1;  
       return asteroid;
@@ -130,21 +127,21 @@ function updateAsteroid(asteroid){
       asteroid.x += asteroid.velX;
       asteroid.y += asteroid.velY;
       if (asteroid.x < 0-asteroid.radius) {
-          asteroid.x = width+asteroid.radius;
+          asteroid.x = game.width+asteroid.radius;
       }
-      if (asteroid.x > width+asteroid.radius) {
+      if (asteroid.x > game.width+asteroid.radius) {
           asteroid.x = 0-asteroid.radius;
       }
       if (asteroid.y < 0-asteroid.radius) {
-          asteroid.y = height+asteroid.radius;
+          asteroid.y = game.height+asteroid.radius;
       }
-      if (asteroid.y > height+asteroid.radius) {
+      if (asteroid.y > game.height+asteroid.radius) {
           asteroid.y = 0-asteroid.radius;
       }
       
   }
 // Handles drawing life ships on screen
-function drawLifeShips(){
+function drawLives(){
   let startX = 1350;
   let startY = 10;
   let points = [[9, 9], [-9, 9]];
@@ -171,7 +168,6 @@ function drawLifeShips(){
  function drawAsteroid(asteroid){
       asteroid.angle+=asteroid.rotateSpeed;
       graphics.lineStyle(2, 0xffffff);
-      graphics.beginPath();
   
     var i = 0;
     var x = rotx(asteroid.shape.points[i].x, asteroid.shape.points[i].y, asteroid.angle) + asteroid.x;
@@ -182,10 +178,7 @@ function drawLifeShips(){
       y = roty(asteroid.shape.points[i].x, asteroid.shape.points[i].y, asteroid.angle) + asteroid.y;
         graphics.lineTo(x, y);
       }
-  
-      graphics.closePath();
-      graphics.strokePath();
-      }
+  }
 
   function CircleCollision(p1x, p1y, r1, p2x, p2y, r2){
     let radiusSum;
@@ -211,7 +204,6 @@ function PolygonsIntersect (a, b) {
       // for each polygon, look at each edge of the polygon, and determine if it separates
       // the two shapes
       var polygon = polygons[i];
-      console.log(polygon.length);
       for (i1 = 0; i1 < polygon.length; i1++) {
           // grab 2 vertices to create an edge
           var i2 = (i1 + 1) % polygon.length;
@@ -280,26 +272,23 @@ function initShip(){
   ship.rotateSpeed = 0.1;
   ship.radius = 15;
   ship.angle = 0;
-  ship.shape = new Phaser.Geom.Polygon(shipShape);
+  ship.shape = new Phaser.Polygon(shipShape);
  
 }
 
 function drawShip(){
     graphics.lineStyle(2, 0xffffff);
-    graphics.beginPath();
-
+ 
   var i = 0;
   var x = rotx(ship.shape.points[i].x, ship.shape.points[i].y, ship.angle) + ship.x;
   var y = roty(ship.shape.points[i].x, ship.shape.points[i].y, ship.angle) + ship.y;
-   graphics.moveTo(x, y);
+  graphics.moveTo(x, y);
    for (i = 1; i < ship.shape.points.length; i++) {
     x = rotx(ship.shape.points[i].x, ship.shape.points[i].y, ship.angle) + ship.x;
     y = roty(ship.shape.points[i].x, ship.shape.points[i].y, ship.angle) + ship.y;
-      graphics.lineTo(x, y);
+    graphics.lineTo(x, y);
     }
 
-    graphics.closePath();
-    graphics.strokePath();
 }
 
 
@@ -310,15 +299,15 @@ function updateShip(){
     }
 
     if (ship.x < ship.radius) {
-        ship.x = width;
+        ship.x = game.width;
     }
-    if (ship.x > width) {
+    if (ship.x > game.width) {
         ship.x = ship.radius;
     }
     if (ship.y < ship.radius) {
-        ship.y = height;
+        ship.y = game.height;
     }
-    if (ship.y > height) {
+    if (ship.y > game.height) {
         ship.y = ship.radius;
     }
 
@@ -330,12 +319,10 @@ function updateShip(){
       // air friction    
       ship.x += ship.velX;
       ship.y += ship.velY;
-
-  }
+    }
 
 function update(){
   graphics.clear();
-
 
   if(game.fireButton.isDown)
   {
@@ -367,23 +354,23 @@ function update(){
         }
     }
     else{
-    updateShip();
+      updateShip();
       drawShip();
-      if (bullets.length > 0) {
-        for(let i = 0; i < bullets.length; i++){
-            updateBullet(bullets[i]);
-            drawBullet(bullets[i]);
-        }
-    }
-    if (asteroids.length !== 0) {
-      for(let j = 0; j < asteroids.length; j++){
-        updateAsteroid(asteroids[j]);
-        drawAsteroid(asteroids[j]);
-        if(PolygonsIntersect(asteroids[j].shape,ship.shape)){
-   // console.log('boom!');
-  }
-}
-}
+//       if (bullets.length > 0) {
+//         for(let i = 0; i < bullets.length; i++){
+//             updateBullet(bullets[i]);
+//             drawBullet(bullets[i]);
+//         }
+//     }
+//     if (asteroids.length !== 0) {
+//       for(let j = 0; j < asteroids.length; j++){
+//         updateAsteroid(asteroids[j]);
+//         drawAsteroid(asteroids[j]);
+//         if(PolygonsIntersect(asteroids[j].shape,ship.shape)){
+//    // console.log('boom!');
+//   }
+// }
+// }
   if (game.cursors.left.isDown) Rotate(LEFT);
   if (game.cursors.right.isDown) Rotate(RIGHT);
   if (game.cursors.up.isDown) ship.movingForward = true;
