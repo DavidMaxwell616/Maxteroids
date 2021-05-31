@@ -7,14 +7,16 @@
 // var ShipExplodeCount = 100;
 // var NumEnemies = 5;
 // var ShipSize = 30;
+var NumAsteroids = 4;
 var gameOverText;
 var gameOver = false;
-let bullets = [];
-let asteroids = [];
+let bullets=[];
+let asteroids=[];
 let score = 0;
 let lives = 3;
 let highScore;
 let localStorageName = "Maxteroids";
+let bulletIndex = 0;
 // var RocksLeft;
 // var ShipsLeft;
 var gameStart = false;
@@ -27,18 +29,7 @@ var rightKey;
 var upKey;
 var downKey;
 var ship = {};
-// var Enemies = [];
-// var Explosion = [];
-// var Particles = [];
-// var Rocks = [];
-// var Bullets = [];
-// var EnemyBullets = [];
-// var shipLine = [];
-// var bulletLine = [];
-//  var enemyBulletLine = [];
-// var enemyLine = [];
-// var ShipsLeft = 5;
-// var RockNumStart = 4;
+var isFiring = false;
 var Level = 1;
 var infoText2;
 var bulletup = 1;
@@ -53,29 +44,58 @@ var shipShape = [
   { x: 14,  y: 0}
 ]
 
-const rockShape = [
-  { x: -50,  y: 0},
-  { x:  -24,  y: -32},
-  { x: -6,  y: -26},
-  { x:  -6,  y: -50},
-  { x:  32,  y: -34},
-  { x:  50,  y: 4},
-  { x:  36,  y: 36},
-  { x:  16,  y: 50},
-  { x:  -34,  y: 38},
-  { x:  -34,  y: 20},
-  { x:  -12,  y: 6},
-  { x: -50,  y: 0}
+const rockShapes=[
+  [
+  { x: -14,  y: -28},
+  { x:  0,  y: -20},
+  { x: 14,  y: -28},
+  { x:  28,  y: -14},
+  { x:  14,  y: -6},
+  { x:  28,  y: 7},
+  { x:  14,  y: 28},
+  { x: -6,  y: 20},
+  { x:  -14,  y: 28},
+  { x: -28,  y: 14},
+  { x: -28,  y: 0},
+  { x: -28,  y: -14},
+  { x: -14,  y: -28},
+ ],
+[
+  { x:-14, y: -28 },
+  {x:7,y:-28},
+  {x:28, y: -13},
+  {x:28, y: -6},
+  {x:7,y: 0},
+  {x: 28, y: 15},
+  {x:14,y:28},
+  {x: 7, y: 22},
+  {x: -14, y: 28},
+  {x: -28, y: 8},
+  {x: -28, y: -13},
+  {x: -7, y: -13},
+  {x:-14, y: -28 }
+],
+[
+  { x:-14, y: -28 },
+  {x:0,y:-14},
+  {x:14, y: -28},
+  {x:28, y: -14},
+  {x:18,y: 0},
+  {x: 28, y: 15},
+  {x:18,y:28},
+  {x: 7, y: 28},
+  {x: -28, y: 14},
+  {x: -28, y: -14},
+  {x:-14, y: -28 }
 ]
+];
 
 const  introTextString = "Rotate Right - Right Arrow \n" +
 "Rotate Left - Left Arrow \n" +
 "Thrust - Up Arrow \n" +
 "Hyperspace - Down Arrow \n" +
 "Fire - Space Bar \n" +
-"Press Space to Start";
-
-
+"Press Space Bar to Play";
 
    // Movement Directions
    var DOWN = 0,
