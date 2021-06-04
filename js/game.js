@@ -32,7 +32,7 @@ function startGame(){
   drawShip();
   
   for(let i = 0; i < NumAsteroids; i++){
-  var asteroid = initAsteroid();
+  var asteroid = initAsteroid(true);
     asteroids.push(asteroid);
   }
 }
@@ -71,8 +71,6 @@ bullet.width = 2;
 bullet.speed = 5;
 bullet.color = 0xffffff;
 bullet.life = 100;
-bullet.bulletIndex = bulletIndex;
-bulletIndex++;
 bullet.shape= graphics.drawRect(bullet.x,bullet.y,bullet.width,bullet.height,bullet.color);
 bullet.velX =  Math.cos(bullet.angle) * bullet.speed;
 bullet.velY = Math.sin(bullet.angle) * bullet.speed;
@@ -93,40 +91,34 @@ bullet.velY = Math.sin(bullet.angle) * bullet.speed;
     bulletHitAsteroid(bullet,asteroid);
 });
 graphics.drawRect(bullet.x,bullet.y,bullet.width,bullet.height,bullet.color);
-if(bullet.life<1){
-  bullets.shift();
-  }
+if(bullet.life==0)
+  bullets.splice(bullets.indexOf(bullet),1);
  }
 }
+
 function bulletHitAsteroid(bullet,asteroid){
- // bullets.splice
+  bullets.splice(bullets.indexOf(bullet),1);
+  explosion(asteroid.x,asteroid.y);
+ initAsteroid(false,asteroid.x,asteroid.y);
+ initAsteroid(false,asteroid.x,asteroid.y);
+ asteroids.splice(asteroids.indexOf(asteroid),1);
+} 
+
+function explosion(x,y){
+for (let index = 0; index < 10; index++) {
+}
 }
 
-function initAsteroid(){
+function initAsteroid(start,x,y){
       var asteroid = {};
       asteroid.visible = true;
       asteroid.width = asteroid.height = 56;
-      var tBLR = game.rnd.integerInRange(1, 4);
-switch (tBLR) {
-  case 1:
-    asteroid.x = game.rnd.integerInRange(0, game.width);
-    asteroid.y=0;
-  break;
-  case 2:
-    asteroid.x = game.rnd.integerInRange(0, game.width);
-    asteroid.y=game.height;
-  break;
-  case 3:
-   asteroid.x = 0;
-  asteroid.y = game.rnd.integerInRange(0, game.height);
-  break;
-  case 4:
-  asteroid.x = game.width;
-  asteroid.y = game.rnd.integerInRange(0, game.height);
-  break;
-  default:
-    break;
-}
+      if(start)
+        startingCoordinates(asteroid);
+        else{
+          asteroid.x =x;
+          asteroid.y =y;
+        }
       asteroid.speed = .3;
       asteroid.angle = game.rnd.integerInRange(0, 359);
       asteroid.velX = game.rnd.integerInRange(1, 3);
@@ -136,7 +128,7 @@ switch (tBLR) {
       if(game.rnd.integerInRange(0, 1)==1)
       asteroid.velY*=-1;
       asteroid.strokeColor = 'white';
-      asteroid.collisionRadius = 46;
+      asteroid.radius = 28;
       asteroid.rotateSpeed = game.rnd.integerInRange(1, 10)/100;
       var rockType = game.rnd.integerInRange(0, 2);
       var shape;
@@ -160,7 +152,31 @@ switch (tBLR) {
       return asteroid;
   }
 
-function updateAsteroid(asteroid){
+function startingCoordinates(asteroid){
+    var tBLR = game.rnd.integerInRange(1, 4);
+    switch (tBLR) {
+      case 1:
+        asteroid.x = game.rnd.integerInRange(0, game.width);
+        asteroid.y=0;
+      break;
+      case 2:
+        asteroid.x = game.rnd.integerInRange(0, game.width);
+        asteroid.y=game.height;
+      break;
+      case 3:
+       asteroid.x = 0;
+      asteroid.y = game.rnd.integerInRange(0, game.height);
+      break;
+      case 4:
+      asteroid.x = game.width;
+      asteroid.y = game.rnd.integerInRange(0, game.height);
+      break;
+      default:
+        break;
+    }
+  }
+
+  function updateAsteroid(asteroid){
       asteroid.x += asteroid.velX;
       asteroid.y += asteroid.velY;
       if (asteroid.x < 0-asteroid.radius) {

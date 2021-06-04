@@ -17,7 +17,6 @@ let score = 0;
 let lives = 3;
 let highScore;
 let localStorageName = "Maxteroids";
-let bulletIndex = 0;
 var gameStart = false;
 var introTextSize = .01;
 var introText;
