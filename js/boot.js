@@ -2,6 +2,7 @@
 // var MAXROCKS = 100;
 // var BIGROCK = 50;
 // var SMALLROCK = 20;
+const BIGROCK = 56;
 // var NumRocks = 5;
 // var NumParticles = 5;
 // var ShipExplodeCount = 100;
@@ -17,8 +18,6 @@ let lives = 3;
 let highScore;
 let localStorageName = "Maxteroids";
 let bulletIndex = 0;
-// var RocksLeft;
-// var ShipsLeft;
 var gameStart = false;
 var introTextSize = .01;
 var introText;
@@ -34,62 +33,7 @@ var Level = 1;
 var infoText2;
 var bulletup = 1;
 var ship = {};
-  
-var shipShape = [
-  { x: 12,  y: 0},
-  { x: -13, y: -8},
-  { x: -10, y: -6},
-  { x: -10, y: 6},
-  { x: -13, y: 8},
-  { x: 14,  y: 0}
-]
-
-const rockShapes=[
-  [
-  { x: -14,  y: -28},
-  { x:  0,  y: -20},
-  { x: 14,  y: -28},
-  { x:  28,  y: -14},
-  { x:  14,  y: -6},
-  { x:  28,  y: 7},
-  { x:  14,  y: 28},
-  { x: -6,  y: 20},
-  { x:  -14,  y: 28},
-  { x: -28,  y: 14},
-  { x: -28,  y: 0},
-  { x: -28,  y: -14},
-  { x: -14,  y: -28},
- ],
-[
-  { x:-14, y: -28 },
-  {x:7,y:-28},
-  {x:28, y: -13},
-  {x:28, y: -6},
-  {x:7,y: 0},
-  {x: 28, y: 15},
-  {x:14,y:28},
-  {x: 7, y: 22},
-  {x: -14, y: 28},
-  {x: -28, y: 8},
-  {x: -28, y: -13},
-  {x: -7, y: -13},
-  {x:-14, y: -28 }
-],
-[
-  { x:-14, y: -28 },
-  {x:0,y:-14},
-  {x:14, y: -28},
-  {x:28, y: -14},
-  {x:18,y: 0},
-  {x: 28, y: 15},
-  {x:18,y:28},
-  {x: 7, y: 28},
-  {x: -28, y: 14},
-  {x: -28, y: -14},
-  {x:-14, y: -28 }
-]
-];
-
+var shapeData;
 const  introTextString = "Rotate Right - Right Arrow \n" +
 "Rotate Left - Left Arrow \n" +
 "Thrust - Up Arrow \n" +

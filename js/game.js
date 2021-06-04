@@ -1,5 +1,10 @@
 var game = new Phaser.Game(600, 600, 
-  Phaser.AUTO, 'phaser-example', { create: create, update: update });
+  Phaser.CANVAS, 'phaser-example', 
+  { 
+    preload: preload,
+    create: create, 
+    update: update,
+   });
 
 function create ()
 {
@@ -11,6 +16,8 @@ function create ()
     highScore = localStorage.getItem(localStorageName);
 
 showTitle();
+
+shapeData = game.cache.getJSON('shapeData');
 
 game.cursors = game.input.keyboard.createCursorKeys();
 game.fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -82,8 +89,8 @@ bullet.velY = Math.sin(bullet.angle) * bullet.speed;
   if(bullet.y < 0) bullet.y = game.height;
   if(bullet.y > game.height) bullet.y = 0;
   asteroids.forEach(asteroid => {
-  if(PolygonsIntersect(bullet.shape,asteroid.shape))
-  console.log('hit');
+  if(Collision(bullet,asteroid))
+    bulletHitAsteroid(bullet,asteroid);
 });
 graphics.drawRect(bullet.x,bullet.y,bullet.width,bullet.height,bullet.color);
 if(bullet.life<1){
@@ -91,10 +98,14 @@ if(bullet.life<1){
   }
  }
 }
+function bulletHitAsteroid(bullet,asteroid){
+ // bullets.splice
+}
 
 function initAsteroid(){
       var asteroid = {};
       asteroid.visible = true;
+      asteroid.width = asteroid.height = 56;
       var tBLR = game.rnd.integerInRange(1, 4);
 switch (tBLR) {
   case 1:
@@ -110,14 +121,13 @@ switch (tBLR) {
   asteroid.y = game.rnd.integerInRange(0, game.height);
   break;
   case 4:
-asteroid.x = game.width;
+  asteroid.x = game.width;
   asteroid.y = game.rnd.integerInRange(0, game.height);
   break;
   default:
     break;
 }
       asteroid.speed = .3;
-      asteroid.radius = 50;
       asteroid.angle = game.rnd.integerInRange(0, 359);
       asteroid.velX = game.rnd.integerInRange(1, 3);
       asteroid.velY = game.rnd.integerInRange(1, 3);
@@ -129,7 +139,22 @@ asteroid.x = game.width;
       asteroid.collisionRadius = 46;
       asteroid.rotateSpeed = game.rnd.integerInRange(1, 10)/100;
       var rockType = game.rnd.integerInRange(0, 2);
-      asteroid.shape = new Phaser.Polygon(rockShapes[rockType]);
+      var shape;
+      switch (rockType) {
+        case 0:
+          shape = shapeData.rock1[0].shape;    
+          break;
+        case 1:
+          shape = shapeData.rock2[0].shape;    
+          break;
+        case 2:
+          shape = shapeData.rock3[0].shape;    
+          break;
+        default:
+          break;
+      }
+      
+      asteroid.shape = new Phaser.Polygon(shape);
       // Used to decide if this asteroid can be broken into smaller pieces
       asteroid.level = 1;  
       return asteroid;
@@ -152,7 +177,15 @@ function updateAsteroid(asteroid){
       }
       
   }
-// Handles drawing life ships on screen
+
+function Collision(a, b){
+  var rectA = new Phaser.Rectangle(a.x, a.y, a.width, a.height);
+    var rectB = new Phaser.Rectangle(b.x, b.y, b.width, b.height);
+    var intersects = Phaser.Rectangle.intersection(rectA, rectB);
+    return (intersects.width+intersects.height>0);
+  }
+
+  // Handles drawing life ships on screen
 function drawLives(){
   let startX = 1350;
   let startY = 10;
@@ -192,80 +225,6 @@ function drawLives(){
         graphics.lineTo(x, y);
       }
   }
-
-  function CircleCollision(p1x, p1y, r1, p2x, p2y, r2){
-    let radiusSum;
-    let xDiff;
-    let yDiff;
- 
-    radiusSum = r1 + r2;
-    xDiff = p1x - p2x;
-    yDiff = p1y - p2y;
- 
-    if (radiusSum > Math.sqrt((xDiff * xDiff) + (yDiff * yDiff))) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-function PolygonsIntersect (a, b) {
-  var polygons = [a, b];
-  var minA, maxA, projected, i, i1, j, minB, maxB;
-  for (i = 0; i < polygons.length; i++) {
-
-      // for each polygon, look at each edge of the polygon, and determine if it separates
-      // the two shapes
-      var polygon = polygons[i];
-      for (i1 = 0; i1 < polygon.length; i1++) {
-          // grab 2 vertices to create an edge
-          var i2 = (i1 + 1) % polygon.length;
-          var p1 = polygon[i1];
-          var p2 = polygon[i2];
-
-          // find the line perpendicular to this edge
-          var normal = { x: p2.y - p1.y, y: p1.x - p2.x };
-
-          minA = maxA = undefined;
-          // for each vertex in the first shape, project it onto the line perpendicular to the edge
-          // and keep track of the min and max of these values
-          for (j = 0; j < a.length; j++) {
-              projected = normal.x * a[j].x + normal.y * a[j].y;
-              if (isUndefined(minA) || projected < minA) {
-                  minA = projected;
-              }
-              if (isUndefined(maxA) || projected > maxA) {
-                  maxA = projected;
-              }
-          }
-
-          // for each vertex in the second shape, project it onto the line perpendicular to the edge
-          // and keep track of the min and max of these values
-          minB = maxB = undefined;
-          for (j = 0; j < b.length; j++) {
-              projected = normal.x * b[j].x + normal.y * b[j].y;
-              if (isUndefined(minB) || projected < minB) {
-                  minB = projected;
-              }
-              if (isUndefined(maxB) || projected > maxB) {
-                  maxB = projected;
-              }
-          }
-
-          // if there is no overlap between the projects, the edge we are looking at separates the two
-          // polygons, and we know there is no overlap
-          if (maxA < minB || maxB < minA) {
-              console.log("polygons don't intersect!");
-              return false;
-          }
-      }
-  }
-  return true;
-};
-
-function degtorad(angle) {
-  return 3.1415926 * angle / 180;
-}
     
 function rotx(x,y,angle) {
   return (x*Math.cos(angle)) - (y*Math.sin(angle));
@@ -285,7 +244,7 @@ function initShip(){
   ship.rotateSpeed = 0.1;
   ship.radius = 15;
   ship.angle = 0;
-  ship.shape = new Phaser.Polygon(shipShape);
+  ship.shape = new Phaser.Polygon(shapeData.ship[0].shape);
  
 }
 
@@ -296,11 +255,11 @@ function drawShip(){
   var x = rotx(ship.shape.points[i].x, ship.shape.points[i].y, ship.angle) + ship.x;
   var y = roty(ship.shape.points[i].x, ship.shape.points[i].y, ship.angle) + ship.y;
   graphics.moveTo(x, y);
-   for (i = 1; i < ship.shape.points.length; i++) {
-    x = rotx(ship.shape.points[i].x, ship.shape.points[i].y, ship.angle) + ship.x;
-    y = roty(ship.shape.points[i].x, ship.shape.points[i].y, ship.angle) + ship.y;
-    graphics.lineTo(x, y);
-    }
+  for (i = 1; i < ship.shape.points.length; i++) {
+  x = rotx(ship.shape.points[i].x, ship.shape.points[i].y, ship.angle) + ship.x;
+  y = roty(ship.shape.points[i].x, ship.shape.points[i].y, ship.angle) + ship.y;
+  graphics.lineTo(x, y);
+  }
 
 }
 
@@ -395,3 +354,4 @@ asteroids.forEach(asteroid => {
   if (game.cursors.down.isDown) Hyperspace();
     }
   }
+
