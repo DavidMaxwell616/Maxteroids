@@ -32,11 +32,35 @@ function startGame(){
   drawShip();
   
   for(let i = 0; i < NumAsteroids; i++){
-  var asteroid = initAsteroid(true);
-    asteroids.push(asteroid);
+    asteroids.push(initAsteroid());
   }
 }
 
+function updateScore(){
+  graphics.lineStyle(2, 0xffffff);
+  
+  var numberData = shapeData.number0[0].shape;
+  var x = 120; var y = 20;
+  graphics.moveTo(x-numberData[0], y-numberData[1]);
+  for (i = 2; i < numberData.length-1; i+=2) {
+    graphics.lineTo(x-numberData[i], y-numberData[i+1]);
+    }
+  x = 140; var y = 20;
+  graphics.moveTo(x-numberData[0], y-numberData[1]);
+  for (i = 2; i < numberData.length-1; i+=2) {
+    graphics.lineTo(x-numberData[i], y-numberData[i+1]);
+    }
+  x = 160; var y = 20;
+  graphics.moveTo(x-numberData[0], y-numberData[1]);
+  for (i = 2; i < numberData.length-1; i+=2) {
+    graphics.lineTo(x-numberData[i], y-numberData[i+1]);
+    }
+  x = 180; var y = 20;
+  graphics.moveTo(x-numberData[0], y-numberData[1]);
+  for (i = 2; i < numberData.length-1; i+=2) {
+    graphics.lineTo(x-numberData[i], y-numberData[i+1]);
+    }
+  }
 
 function showTitle() {
   var style = { font: "72px Arial", fontWeight: 'Bold', fontSize: 72, fill: '#ff0000', align: "center" };
@@ -99,9 +123,11 @@ if(bullet.life==0)
 function bulletHitAsteroid(bullet,asteroid){
   bullets.splice(bullets.indexOf(bullet),1);
   explosion(asteroid.x,asteroid.y);
- initAsteroid(false,asteroid.x,asteroid.y);
- initAsteroid(false,asteroid.x,asteroid.y);
- asteroids.splice(asteroids.indexOf(asteroid),1);
+  if(asteroid.level==1){
+    asteroids.push(initAsteroid(asteroid));
+    asteroids.push(initAsteroid(asteroid));
+    }
+  asteroids.splice(asteroids.indexOf(asteroid),1);
 } 
 
 function explosion(x,y){
@@ -109,16 +135,20 @@ for (let index = 0; index < 10; index++) {
 }
 }
 
-function initAsteroid(start,x,y){
-      var asteroid = {};
-      asteroid.visible = true;
-      asteroid.width = asteroid.height = 56;
-      if(start)
+function initAsteroid(asteroid){
+      if(asteroid==null){
+        var asteroid = {};
         startingCoordinates(asteroid);
-        else{
-          asteroid.x =x;
-          asteroid.y =y;
+        asteroid.level=1;
+      }
+      else{
+        var newAsteroid = {};
+          newAsteroid.x =asteroid.x;
+          newAsteroid.y =asteroid.y;
+          newAsteroid.level=2;
+          asteroid = newAsteroid;
         }
+      asteroid.width = asteroid.height = asteroid.level==1 ? 56 : 28;
       asteroid.speed = .3;
       asteroid.angle = game.rnd.integerInRange(0, 359);
       asteroid.velX = game.rnd.integerInRange(1, 3);
@@ -128,7 +158,7 @@ function initAsteroid(start,x,y){
       if(game.rnd.integerInRange(0, 1)==1)
       asteroid.velY*=-1;
       asteroid.strokeColor = 'white';
-      asteroid.radius = 28;
+      asteroid.radius = asteroid.width/2;
       asteroid.rotateSpeed = game.rnd.integerInRange(1, 10)/100;
       var rockType = game.rnd.integerInRange(0, 2);
       var shape;
@@ -145,10 +175,9 @@ function initAsteroid(start,x,y){
         default:
           break;
       }
-      
-      asteroid.shape = new Phaser.Polygon(shape);
-      // Used to decide if this asteroid can be broken into smaller pieces
-      asteroid.level = 1;  
+      const rockSize =  asteroid.level==1 ? 1.5 : .5;
+      const map = shape.map(x => x * rockSize);
+      asteroid.shape = new Phaser.Polygon(map);      
       return asteroid;
   }
 
@@ -203,27 +232,21 @@ function Collision(a, b){
 
   // Handles drawing life ships on screen
 function drawLives(){
-  let startX = 1350;
-  let startY = 10;
-  let points = [[9, 9], [-9, 9]];
-  graphics.strokeStyle = 'white'; // Stroke color of ships
-  // Cycle through all live ships remaining
-  for(let i = 0; i < lives; i++){
-      // Start drawing ship
-      graphics.beginPath();
-      // Move to origin point
-      graphics.moveTo(startX, startY);
-      // Cycle through all other points
-      for(let j = 0; j < points.length; j++){
-        graphics.lineTo(startX + points[j][0], 
-              startY + points[j][1]);
+  let startX = game.width*.75;
+  let startY = 20;
+
+  graphics.lineStyle(2, 0xffffff);
+  points = [0,12,-8,-12,-6,-10,6,-10,8,-12,0,12];
+    for(let i = 0; i < lives; i++){
+      var x = startX+i*30;
+      var y = startY;
+      var angle = 40;
+      for(let j = 0; j < points.length; j+=2){
+        if(j==0)
+          graphics.moveTo(x+points[j],y+points[j+1]);
+        else
+        graphics.lineTo(x+points[j],y+points[j+1]);
       }
-      // Draw from last point to 1st origin point
-      graphics.closePath();
-      // Stroke the ship shape white
-      graphics.stroke();
-      // Move next shape 30 pixels to the left
-      startX -= 30;
   }
 }
 
@@ -345,7 +368,9 @@ else{
  
       updateShip();
       drawShip();
-    
+      updateScore();
+      drawLives();
+
       bullets.forEach(bullet => {
         updateBullet(bullet);
       });
