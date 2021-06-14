@@ -1,3 +1,4 @@
+const debugDraw = true;
 // var MAXENEMIES = 100;
 // var MAXROCKS = 100;
 // var BIGROCK = 50;
@@ -8,11 +9,13 @@ const BIGROCK = 56;
 // var ShipExplodeCount = 100;
 // var NumEnemies = 5;
 // var ShipSize = 30;
+const infoY = 20;
 var NumAsteroids = 4;
 var gameOverText;
 var gameOver = false;
 let bullets=[];
 let asteroids=[];
+let particles = [];
 let score = 0;
 let lives = 3;
 let highScore;

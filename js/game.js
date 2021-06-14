@@ -40,25 +40,25 @@ function updateScore(){
   graphics.lineStyle(2, 0xffffff);
   
   var numberData = shapeData.number0[0].shape;
-  var x = 120; var y = 20;
-  graphics.moveTo(x-numberData[0], y-numberData[1]);
+  var x = 120; 
+  graphics.moveTo(x-numberData[0], infoY-numberData[1]);
   for (i = 2; i < numberData.length-1; i+=2) {
-    graphics.lineTo(x-numberData[i], y-numberData[i+1]);
+    graphics.lineTo(x-numberData[i], infoY-numberData[i+1]);
     }
-  x = 140; var y = 20;
-  graphics.moveTo(x-numberData[0], y-numberData[1]);
+  x = 140; 
+  graphics.moveTo(x-numberData[0], infoY-numberData[1]);
   for (i = 2; i < numberData.length-1; i+=2) {
-    graphics.lineTo(x-numberData[i], y-numberData[i+1]);
+    graphics.lineTo(x-numberData[i], infoY-numberData[i+1]);
     }
-  x = 160; var y = 20;
-  graphics.moveTo(x-numberData[0], y-numberData[1]);
+  x = 160; 
+  graphics.moveTo(x-numberData[0], infoY-numberData[1]);
   for (i = 2; i < numberData.length-1; i+=2) {
-    graphics.lineTo(x-numberData[i], y-numberData[i+1]);
+    graphics.lineTo(x-numberData[i], infoY-numberData[i+1]);
     }
-  x = 180; var y = 20;
-  graphics.moveTo(x-numberData[0], y-numberData[1]);
+  x = 180; 
+  graphics.moveTo(x-numberData[0], infoY-numberData[1]);
   for (i = 2; i < numberData.length-1; i+=2) {
-    graphics.lineTo(x-numberData[i], y-numberData[i+1]);
+    graphics.lineTo(x-numberData[i], infoY-numberData[i+1]);
     }
   }
 
@@ -131,10 +131,41 @@ function bulletHitAsteroid(bullet,asteroid){
 } 
 
 function explosion(x,y){
-for (let index = 0; index < 10; index++) {
-}
+for (let index = 0; index < 6; index++) 
+  addParticle(x,y);
 }
 
+function addParticle(x,y){
+  var particle = {};
+particle.x = x;
+particle.y = y;
+particle.angle = game.rnd.integerInRange(0, 359);
+particle.height = 2;
+particle.width = 2;
+particle.speed = 5;
+particle.color = 0xffffff;
+particle.life = 50;
+particle.shape= graphics.drawRect(particle.x,particle.y,particle.width,particle.height,particle.color);
+particle.velX =  Math.cos(particle.angle) * particle.speed;
+particle.velY = Math.sin(particle.angle) * particle.speed;
+particles.push(particle);
+}
+
+function moveParticle(particle){
+  if(particle!=undefined && particle.shape!=null)
+  { 
+     particle.life--;
+    particle.x += particle.velX;
+    particle.y += particle.velY;
+  if (particle.x < 0) particle.x = game.width;
+  if (particle.x > game.width) particle.x = 0;
+  if(particle.y < 0) particle.y = game.height;
+  if(particle.y > game.height) particle.y = 0;
+  graphics.drawRect(particle.x,particle.y,particle.width,particle.height,particle.color);
+  if(particle.life==0)
+  particles.splice(particles.indexOf(particle),1);
+ }
+}
 function initAsteroid(asteroid){
       if(asteroid==null){
         var asteroid = {};
@@ -158,7 +189,7 @@ function initAsteroid(asteroid){
       if(game.rnd.integerInRange(0, 1)==1)
       asteroid.velY*=-1;
       asteroid.strokeColor = 'white';
-      asteroid.radius = asteroid.width/2;
+      asteroid.radius = asteroid.width*2;
       asteroid.rotateSpeed = game.rnd.integerInRange(1, 10)/100;
       var rockType = game.rnd.integerInRange(0, 2);
       var shape;
@@ -175,9 +206,11 @@ function initAsteroid(asteroid){
         default:
           break;
       }
-      const rockSize =  asteroid.level==1 ? 1.5 : .5;
+      var rockSize =  asteroid.level==1 ? 1.5 : .5;
       const map = shape.map(x => x * rockSize);
-      asteroid.shape = new Phaser.Polygon(map);      
+      asteroid.shape = new Phaser.Polygon(map);  
+     // var width = Math.min(...asteroid.shape) 
+      //console.log(width);   
       return asteroid;
   }
 
@@ -208,17 +241,18 @@ function startingCoordinates(asteroid){
   function updateAsteroid(asteroid){
       asteroid.x += asteroid.velX;
       asteroid.y += asteroid.velY;
-      if (asteroid.x < 0-asteroid.radius) {
-          asteroid.x = game.width+asteroid.radius;
+
+      if (asteroid.x < 0) {
+          asteroid.x = game.width;
       }
-      if (asteroid.x > game.width+asteroid.radius) {
-          asteroid.x = 0-asteroid.radius;
+      if (asteroid.x > game.width) {
+          asteroid.x = 0;
       }
-      if (asteroid.y < 0-asteroid.radius) {
-          asteroid.y = game.height+asteroid.radius;
+      if (asteroid.y < 0) {
+          asteroid.y = game.height;
       }
-      if (asteroid.y > game.height+asteroid.radius) {
-          asteroid.y = 0-asteroid.radius;
+      if (asteroid.y > game.height) {
+          asteroid.y = 0;
       }
       
   }
@@ -227,25 +261,22 @@ function Collision(a, b){
   var rectA = new Phaser.Rectangle(a.x, a.y, a.width, a.height);
     var rectB = new Phaser.Rectangle(b.x, b.y, b.width, b.height);
     var intersects = Phaser.Rectangle.intersection(rectA, rectB);
-    return (intersects.width+intersects.height>0);
+    return (intersects.width+intersects.height*intersects.width+intersects.width>0);
   }
 
   // Handles drawing life ships on screen
 function drawLives(){
   let startX = game.width*.75;
-  let startY = 20;
 
   graphics.lineStyle(2, 0xffffff);
-  points = [0,12,-8,-12,-6,-10,6,-10,8,-12,0,12];
+  points = [0,-12,-8,12,-6,10,6,10,8,12,0,-12];
     for(let i = 0; i < lives; i++){
-      var x = startX+i*30;
-      var y = startY;
-      var angle = 40;
+      var x = startX+i*20;
       for(let j = 0; j < points.length; j+=2){
         if(j==0)
-          graphics.moveTo(x+points[j],y+points[j+1]);
+          graphics.moveTo(x+points[j],infoY+points[j+1]);
         else
-        graphics.lineTo(x+points[j],y+points[j+1]);
+        graphics.lineTo(x+points[j],infoY+points[j+1]);
       }
   }
 }
@@ -263,6 +294,10 @@ function drawLives(){
       y = roty(asteroid.shape.points[i].x, asteroid.shape.points[i].y, asteroid.angle) + asteroid.y;
         graphics.lineTo(x, y);
       }
+      
+  if(debugDraw) graphics.drawRect(asteroid.x-asteroid.shape.width/2, 
+                                    asteroid.y-asteroid.shape.height/2, 
+                                    asteroid.shape.width,asteroid.shape.height);
   }
     
 function rotx(x,y,angle) {
@@ -366,14 +401,17 @@ else{
   isFiring = false;
   }
  
-      updateShip();
-      drawShip();
-      updateScore();
-      drawLives();
+  updateShip();
+  drawShip();
+  updateScore();
+  drawLives();
+  particles.forEach(particle => {
+     moveParticle(particle);
+  });
 
-      bullets.forEach(bullet => {
-        updateBullet(bullet);
-      });
+  bullets.forEach(bullet => {
+    updateBullet(bullet);
+  });
 
 asteroids.forEach(asteroid => {
     updateAsteroid(asteroid);
