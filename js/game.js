@@ -35,32 +35,26 @@ function startGame(){
     asteroids.push(initAsteroid());
   }
 }
+function getDigit(number, n) {
+  return Math.floor((number / Math.pow(10, n - 1)) % 10);
+}
+
+function drawNumber(x,digit){
+  var numberData = shapeData.numbers[digit][0].shape;
+graphics.moveTo(x+numberData[0], infoY+numberData[1]);
+for (i = 2; i < numberData.length-1; i+=2) {
+graphics.lineTo(x+numberData[i], infoY+numberData[i+1]);
+}
+}
 
 function updateScore(){
   graphics.lineStyle(2, 0xffffff);
-  
-  var numberData = shapeData.number0[0].shape;
-  var x = 120; 
-  graphics.moveTo(x-numberData[0], infoY-numberData[1]);
-  for (i = 2; i < numberData.length-1; i+=2) {
-    graphics.lineTo(x-numberData[i], infoY-numberData[i+1]);
-    }
-  x = 140; 
-  graphics.moveTo(x-numberData[0], infoY-numberData[1]);
-  for (i = 2; i < numberData.length-1; i+=2) {
-    graphics.lineTo(x-numberData[i], infoY-numberData[i+1]);
-    }
-  x = 160; 
-  graphics.moveTo(x-numberData[0], infoY-numberData[1]);
-  for (i = 2; i < numberData.length-1; i+=2) {
-    graphics.lineTo(x-numberData[i], infoY-numberData[i+1]);
-    }
-  x = 180; 
-  graphics.moveTo(x-numberData[0], infoY-numberData[1]);
-  for (i = 2; i < numberData.length-1; i+=2) {
-    graphics.lineTo(x-numberData[i], infoY-numberData[i+1]);
-    }
+  for (let index = 1; index < 5; index++) {
+    var x = 200-(index*20); 
+    digit = getDigit(score,index);
+    drawNumber(x,digit);   
   }
+}
 
 function showTitle() {
   var style = { font: "72px Arial", fontWeight: 'Bold', fontSize: 72, fill: '#ff0000', align: "center" };
@@ -121,6 +115,7 @@ if(bullet.life==0)
 }
 
 function bulletHitAsteroid(bullet,asteroid){
+  score+= 50 * asteroid.level;
   bullets.splice(bullets.indexOf(bullet),1);
   explosion(asteroid.x,asteroid.y);
   if(asteroid.level==1){
@@ -166,10 +161,11 @@ function moveParticle(particle){
   particles.splice(particles.indexOf(particle),1);
  }
 }
+
 function initAsteroid(asteroid){
       if(asteroid==null){
         var asteroid = {};
-        startingCoordinates(asteroid);
+        AsteroidSpawnPosition(asteroid);
         asteroid.level=1;
       }
       else{
@@ -192,29 +188,15 @@ function initAsteroid(asteroid){
       asteroid.radius = asteroid.width*2;
       asteroid.rotateSpeed = game.rnd.integerInRange(1, 10)/100;
       var rockType = game.rnd.integerInRange(0, 2);
-      var shape;
-      switch (rockType) {
-        case 0:
-          shape = shapeData.rock1[0].shape;    
-          break;
-        case 1:
-          shape = shapeData.rock2[0].shape;    
-          break;
-        case 2:
-          shape = shapeData.rock3[0].shape;    
-          break;
-        default:
-          break;
-      }
+      var shape = shapeData.rocks[rockType][0].shape;    
       var rockSize =  asteroid.level==1 ? 1.5 : .5;
       const map = shape.map(x => x * rockSize);
       asteroid.shape = new Phaser.Polygon(map);  
      // var width = Math.min(...asteroid.shape) 
-      //console.log(width);   
       return asteroid;
   }
 
-function startingCoordinates(asteroid){
+function AsteroidSpawnPosition(asteroid){
     var tBLR = game.rnd.integerInRange(1, 4);
     switch (tBLR) {
       case 1:
