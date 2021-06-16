@@ -1,4 +1,4 @@
-const debugDraw = true;
+const debugDraw = false;
 // var MAXENEMIES = 100;
 // var MAXROCKS = 100;
 // var BIGROCK = 50;
@@ -16,6 +16,7 @@ var gameOver = false;
 let bullets=[];
 let asteroids=[];
 let particles = [];
+let enemies = [];
 let score = 0;
 let lives = 3;
 let highScore;
