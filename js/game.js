@@ -25,12 +25,9 @@ window.graphics = graphics;
 
 }
 
-function startGame(){
+function startLevel(){
   gameOver = false;
-  ShipsLeft=5;
-  initShip();
-  drawShip();
-  
+
   for(let i = 0; i < NumAsteroids; i++){
     asteroids.push(initAsteroid());
   }
@@ -40,20 +37,30 @@ function getDigit(number, n) {
   return Math.floor((number / Math.pow(10, n - 1)) % 10);
 }
 
-function drawNumber(x,digit){
+function drawNumber(x,digit,size){
   var numberData = shapeData.numbers[digit][0].shape;
-graphics.moveTo(x+numberData[0], infoY+numberData[1]);
-for (i = 2; i < numberData.length-1; i+=2) {
-graphics.lineTo(x+numberData[i], infoY+numberData[i+1]);
-}
+  const map = numberData.map(x => x * size);
+  graphics.moveTo(x+map[0] , infoY+map[1]);
+  for (i = 2; i < numberData.length-1; i+=2) {
+  graphics.lineTo(x+map[i], infoY+map[i+1]);
+  }
 }
 
 function updateScore(){
   graphics.lineStyle(2, 0xffffff);
   for (let index = 1; index < 5; index++) {
-    var x = 200-(index*20); 
+    var x = 200-(index*20);
     digit = getDigit(score,index);
-    drawNumber(x,digit);   
+    drawNumber(x,digit,1);   
+  }
+}
+
+function updateHighScore(){
+  graphics.lineStyle(2, 0xffffff);
+  for (let index = 1; index < 5; index++) {
+    var x = 350-(index*10); 
+    digit = getDigit(highScore,index);
+    drawNumber(x,digit,.5);   
   }
 }
 
@@ -81,7 +88,8 @@ ship.x = game.rnd.integerInRange(0, game.width);
 ship.y = game.rnd.integerInRange(0, game.height);
 }
 
-function initBullet(bullet){
+function initBullet(){
+var bullet = {};
 bullet.x = ship.x;
 bullet.y = ship.y;
 bullet.angle = ship.angle;
@@ -93,6 +101,22 @@ bullet.life = 100;
 bullet.shape= graphics.drawRect(bullet.x,bullet.y,bullet.width,bullet.height,bullet.color);
 bullet.velX =  Math.cos(bullet.angle) * bullet.speed;
 bullet.velY = Math.sin(bullet.angle) * bullet.speed;
+return bullet;  
+}
+
+function initEnemyBullet(enemy){
+  var bullet = {};
+  bullet.x = enemy.x;
+  bullet.y = enemy.y;
+  bullet.height = 2;
+  bullet.width = 2;
+  bullet.speed = 5;
+  bullet.color = 0xffffff;
+  bullet.life = 100;
+  bullet.shape= graphics.drawRect(bullet.x,bullet.y,bullet.width,bullet.height,bullet.color);
+  bullet.velX = Math.cos(enemy.x-ship.x) * bullet.speed;
+  bullet.velY = Math.sin(enemy.y-ship.y) * bullet.speed;
+return bullet;  
 }
 
  function updateBullet(bullet){
@@ -107,23 +131,56 @@ bullet.velY = Math.sin(bullet.angle) * bullet.speed;
   if(bullet.y > game.height) bullet.y = 0;
   asteroids.forEach(asteroid => {
   if(Collision(bullet,asteroid))
-    bulletHitAsteroid(bullet,asteroid);
-});
+    bulletHitAsteroid(asteroid);
+  //  bullets.splice(bullets.indexOf(bullet),1);
+  });
+  enemies.forEach(enemy => {
+    if(Collision(bullet,enemy))
+      bulletHitEnemy(enemy);
+    //  bullets.splice(bullets.indexOf(bullet),1);
+    });
+    
 graphics.drawRect(bullet.x,bullet.y,bullet.width,bullet.height,bullet.color);
 if(bullet.life==0)
   bullets.splice(bullets.indexOf(bullet),1);
  }
 }
 
-function bulletHitAsteroid(bullet,asteroid){
-  score+= 50 * asteroid.level;
-  bullets.splice(bullets.indexOf(bullet),1);
+function updateEnemyBullet(bullet){
+  if(bullet!=undefined && bullet.shape!=null)
+  { 
+    bullet.life--;
+   bullet.x +=  bullet.velX;
+   bullet.y +=bullet.velY;
+  if (bullet.x < 0) bullet.x = game.width;
+  if (bullet.x > game.width) bullet.x = 0;
+  if(bullet.y < 0) bullet.y = game.height;
+  if(bullet.y > game.height) bullet.y = 0;
+ asteroids.forEach(asteroid => {
+  if(Collision(bullet,asteroid))
+     bulletHitAsteroid(asteroid);
+     enemyBullets.splice(enemyBullets.indexOf(bullet),1);
+    });
+graphics.drawRect(bullet.x,bullet.y,bullet.width,bullet.height,bullet.color);
+if(bullet.life==0)
+  enemyBullets.splice(enemyBullets.indexOf(bullet),1);
+ }
+}
+
+function bulletHitAsteroid(asteroid){
+  score+= asteroid.score;
   explosion(asteroid.x,asteroid.y);
   if(asteroid.level==1){
     asteroids.push(initAsteroid(asteroid));
     asteroids.push(initAsteroid(asteroid));
     }
   asteroids.splice(asteroids.indexOf(asteroid),1);
+} 
+
+function bulletHitEnemy(enemy){
+  score+= enemy.score;
+  explosion(enemy.x,enemy.y);
+  enemies.splice(enemies.indexOf(enemy),1);
 } 
 
 function explosion(x,y){
@@ -190,6 +247,7 @@ function initAsteroid(asteroid){
       var shape = shapeData.rocks[rockType][0].shape;    
       var rockSize =  asteroid.level==1 ? 1.5 : .5;
       const map = shape.map(x => x * rockSize);
+      asteroid.score = asteroid.level==1 ? 50 : 100;
       asteroid.shape = new Phaser.Polygon(map);  
       asteroid.height =(getMaxY(asteroid.shape.points)-getMinY(asteroid.shape.points));
       asteroid.width =(getMaxX(asteroid.shape.points)-getMinX(asteroid.shape.points));
@@ -333,22 +391,49 @@ function drawShip(){
 function initEnemy(){
   var enemy = {};
   EnemySpawnPosition(enemy);
-  enemy.shape = new Phaser.Polygon(shapeData.enemy[0].shape);
+  enemy.size = game.rnd.integerInRange(1, 2)==1 ? 1.75 : 1;
+  enemy.score = enemy.size==1?200:100;
+  var shape = shapeData.enemy[0].shape;    
+  const map = shape.map(x => x * enemy.size);
+  enemy.shape = new Phaser.Polygon(map);  
+  enemy.height =(getMaxY(enemy.shape.points)-getMinY(enemy.shape.points));
+  enemy.width =(getMaxX(enemy.shape.points)-getMinX(enemy.shape.points));
   enemies.push(enemy);
 }
 
 function drawEnemy(enemy){
-console.log(enemy);
-  graphics.moveTo(enemy.shape.points[0].x, enemy.shape.points[0].y);
-  for (i = 1; i < enemy.shape.points.length; i++) 
-    graphics.lineTo(enemy.shape.points[i].x, enemy.shape.points[i].y);
+  graphics.lineStyle(2, 0xffffff);
+  graphics.moveTo(enemy.x,enemy.y);
+  for (i = 0; i < enemy.shape.points.length; i++) 
+    graphics.lineTo(enemy.x+enemy.shape.points[i].x, enemy.y+enemy.shape.points[i].y);
+}
+
+function updateEnemy(enemy){
+  if (enemy.x < 0 || enemy.x>game.width) {
+    enemies.splice(enemies.indexOf(enemy),1);
+  }
+  if (enemy.y < 0) {
+      enemy.y = game.height;
+  }
+  if (enemy.y > game.height) {
+      enemy.y = 0;
+  }
+  enemy.x += enemy.velX;
+  enemy.y += enemy.velY;
+  if(game.rnd.integerInRange(1, 100)==1){
+  enemy.velY*=-1;
+  }
+  if(game.rnd.integerInRange(1, 100)==1){
+     var bullet = initEnemyBullet(enemy);
+     enemyBullets.push(bullet);
+    }
 }
 
   function EnemySpawnPosition(enemy){
     enemy.y = game.rnd.integerInRange(0, game.height);
     enemy.x = game.rnd.integerInRange(1, 2)==1 ? 0 : game.width;
-    enemy.velX = enemy.x == game.width ? -1: 1;
-    enemy.velY = game.rnd.integerInRange(-1, 1);
+    enemy.velX = enemy.x == game.width ? -3: 3;
+    enemy.velY = game.rnd.integerInRange(-3, 3);
   }
 
 function updateShip(){
@@ -377,20 +462,7 @@ function updateShip(){
     ship.y += ship.velY;
     }
 
-    function updateEnemy(enemy){
-      if (enemy.x < 0 || enemy.x>game.width) {
-        enemies.splice(enemies.indexOf(enemy),1);
-      }
-      if (enemy.y < 0) {
-          enemy.y = game.height;
-      }
-      if (enemy.y > game.height) {
-          enemy.y = 0;
-      }
-      enemy.x += enemy.velX;
-      enemy.y += enemy.velY;
-     
-      }
+
   
 function update(){
   if (!gameStart) {
@@ -409,15 +481,16 @@ function update(){
       if(gameOverText!=undefined)
           gameOverText.visible = false;
           isFiring = true;
-          startGame();
+          initShip();
+          drawShip();
+          startLevel();
       }
     }
   }
 else{
   graphics.clear();
   if (game.fireButton.isDown && !isFiring) {
-    var bullet = {};
-    initBullet(bullet);
+    var bullet = initBullet();
     bullets.push(bullet);
       isFiring = true;
   }
@@ -432,6 +505,7 @@ else{
   updateShip();
   drawShip();
   updateScore();
+  updateHighScore();
   drawLives();
   particles.forEach(particle => {
      moveParticle(particle);
@@ -446,11 +520,39 @@ else{
     drawEnemy(enemy);
  });
 
+ enemyBullets.forEach(enemyBullet => {
+  updateEnemyBullet(enemyBullet);
+});
+
 asteroids.forEach(asteroid => {
     updateAsteroid(asteroid);
     drawAsteroid(asteroid);
+    if(Collision(ship,asteroid)){
+      AsteroidHitShip(asteroid);
+      lives--;
+    }
 });
 
+if(asteroids.length==0 && enemies.length==0 && !gameOver)
+{
+  level++;
+  NumAsteroids+=2;
+  startLevel();
+}
+
+  if (lives === 0 && !gameOver) {
+    gameOver = true;
+    // draw text
+    drawInfoText(
+      '         G A M E    O V E R \n\n Press spacebar play again',
+      520,
+      200,
+      32,
+      'rgb(255,0,0)',
+      'Impact',
+      0,
+    );
+}
  
   if (game.cursors.left.isDown) Rotate(LEFT);
   if (game.cursors.right.isDown) Rotate(RIGHT);

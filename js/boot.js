@@ -14,12 +14,15 @@ var NumAsteroids = 4;
 var gameOverText;
 var gameOver = false;
 let bullets=[];
+let enemyBullets=[];
 let asteroids=[];
 let particles = [];
 let enemies = [];
+let ship = {};
 let score = 0;
 let lives = 3;
 let highScore;
+let level = 1;
 let localStorageName = "Maxteroids";
 var gameStart = false;
 var introTextSize = .01;
@@ -30,12 +33,9 @@ var leftKey;
 var rightKey;
 var upKey;
 var downKey;
-var ship = {};
 var isFiring = false;
 var Level = 1;
 var infoText2;
-var bulletup = 1;
-var ship = {};
 var shapeData;
 const  introTextString = "Rotate Right - Right Arrow \n" +
 "Rotate Left - Left Arrow \n" +
