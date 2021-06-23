@@ -15,7 +15,13 @@ function create ()
  else 
     highScore = localStorage.getItem(localStorageName);
 
-showTitle();
+showText('MAXTEROIDS',72,'#ff0000',game.width/2,game.height/2);
+//showText(introTextString,72,'#ff0000',game.width/2,game.height * .75);
+//showText('MASTEROIDS',24,'#ff0000',game.width/2,game.height/2);
+style = { font: "72px Arial", fontWeight: 'Bold', fontSize: 24, fill: '#ff0000', align: "center" };
+introText2 = game.add.text(game.width / 2, 370, introTextString, style);
+introText2.anchor.setTo(0.5);
+introText2.visible = false; 
 
 shapeData = game.cache.getJSON('shapeData');
 
@@ -64,21 +70,12 @@ function updateHighScore(){
   }
 }
 
-function showTitle() {
-  var style = { font: "72px Arial", fontWeight: 'Bold', fontSize: 72, fill: '#ff0000', align: "center" };
-  introText = game.add.text(game.width / 2, game.height / 2, "MAXTEROIDS", style);
+function showText(text, size,color,x,y) {
+  var style = { font: size+"px Arial", fontWeight: 'Bold', fontSize: size, fill: color, align: "center" };
+  introText = game.add.text(game.width / 2, game.height / 2, text, style);
   introText.anchor.setTo(0.5);
+ }
  
-  style = { font: "72px Arial", fontWeight: 'Bold', fontSize: 24, fill: '#ff0000', align: "center" };
-  introText2 = game.add.text(game.width / 2, game.height * .75, introTextString, style);
-  introText2.anchor.setTo(0.5);
-  introText2.visible = false;
-  style = { font: "18px Arial", fontWeight: 'Bold', fontSize: 24, fill: '#ffffff', align: "center" };
-  infoText2 = game.add.text(game.width / 2, 20, "", style);
-  infoText2.anchor.setTo(0.5);
-  infoText2.visible = false; 
-}
-
 function Rotate(dir) {
   ship.angle += ship.rotateSpeed * dir;
 }
@@ -114,8 +111,24 @@ function initEnemyBullet(enemy){
   bullet.color = 0xffffff;
   bullet.life = 100;
   bullet.shape= graphics.drawRect(bullet.x,bullet.y,bullet.width,bullet.height,bullet.color);
+  if(!shipDestroyed){
   bullet.velX = Math.cos(enemy.x-ship.x) * bullet.speed;
   bullet.velY = Math.sin(enemy.y-ship.y) * bullet.speed;
+  }
+  else {
+    if(asteroids.length>0){
+      var i = game.rnd.integerInRange(0, asteroids.length-1);
+      var asteroid = asteroids[i];
+      bullet.velX = Math.cos(enemy.x-asteroid.x) * bullet.speed;
+      bullet.velY = Math.sin(enemy.y-asteroid.y) * bullet.speed;
+    }
+    else{
+      var randomX = game.rnd.integerInRange(0, game.width);
+      var randomY = game.rnd.integerInRange(0, game.height);
+      bullet.velX = Math.cos(enemy.x-randomX.x) * bullet.speed;
+      bullet.velY = Math.sin(enemy.y-randomY.y) * bullet.speed;
+      } 
+    }
 return bullet;  
 }
 
@@ -132,12 +145,10 @@ return bullet;
   asteroids.forEach(asteroid => {
   if(Collision(bullet,asteroid))
     bulletHitAsteroid(asteroid);
-  //  bullets.splice(bullets.indexOf(bullet),1);
   });
   enemies.forEach(enemy => {
     if(Collision(bullet,enemy))
       bulletHitEnemy(enemy);
-    //  bullets.splice(bullets.indexOf(bullet),1);
     });
     
 graphics.drawRect(bullet.x,bullet.y,bullet.width,bullet.height,bullet.color);
@@ -177,6 +188,28 @@ function bulletHitAsteroid(asteroid){
   asteroids.splice(asteroids.indexOf(asteroid),1);
 } 
 
+function asteroidHitShip(asteroid){
+  explosion(asteroid.x,asteroid.y);
+  if(asteroid.level==1){
+    asteroids.push(initAsteroid(asteroid));
+    asteroids.push(initAsteroid(asteroid));
+    }
+  asteroids.splice(asteroids.indexOf(asteroid),1);
+  explosion(ship.x,ship.y);
+  shipDestroyed = true;
+} 
+
+function asteroidHitEnemy(asteroid,enemy){
+  explosion(asteroid.x,asteroid.y);
+  if(asteroid.level==1){
+    asteroids.push(initAsteroid(asteroid));
+    asteroids.push(initAsteroid(asteroid));
+    }
+    asteroids.splice(asteroids.indexOf(asteroid),1);
+    explosion(enemy.x,enemy.y);
+    enemies.splice(enemies.indexOf(enemy),1);
+}
+ 
 function bulletHitEnemy(enemy){
   score+= enemy.score;
   explosion(enemy.x,enemy.y);
@@ -368,9 +401,10 @@ function initShip(){
   ship.velX = 0;
   ship.velY = 0;
   ship.rotateSpeed = 0.1;
-  ship.radius = 15;
   ship.angle = 0;
   ship.shape = new Phaser.Polygon(shapeData.ship[0].shape);
+  ship.height =(getMaxY(ship.shape.points)-getMinY(ship.shape.points));
+  ship.width =(getMaxX(ship.shape.points)-getMinX(ship.shape.points));
 }
 
 function drawShip(){
@@ -385,6 +419,8 @@ function drawShip(){
   y = roty(ship.shape.points[i].x, ship.shape.points[i].y, ship.angle) + ship.y;
   graphics.lineTo(x, y);
   }
+  if(debugDraw) graphics.drawRect(ship.x-ship.width/2, ship.y-ship.height/2, 
+    ship.width,ship.height);
 
 }
 
@@ -502,8 +538,10 @@ else{
   if(game.rnd.integerInRange(0, 100)==100)
     initEnemy();
 
+    if(!shipDestroyed){
   updateShip();
   drawShip();
+    }
   updateScore();
   updateHighScore();
   drawLives();
@@ -518,7 +556,12 @@ else{
   enemies.forEach(enemy => {
     updateEnemy(enemy);
     drawEnemy(enemy);
- });
+    asteroids.forEach(asteroid => {
+      if(Collision(enemy,asteroid)){
+        asteroidHitEnemy(asteroid,enemy);
+      }
+      });
+  });
 
  enemyBullets.forEach(enemyBullet => {
   updateEnemyBullet(enemyBullet);
@@ -527,8 +570,8 @@ else{
 asteroids.forEach(asteroid => {
     updateAsteroid(asteroid);
     drawAsteroid(asteroid);
-    if(Collision(ship,asteroid)){
-      AsteroidHitShip(asteroid);
+    if(!shipDestroyed && Collision(ship,asteroid)){
+      asteroidHitShip(asteroid);
       lives--;
     }
 });
@@ -544,7 +587,7 @@ if(asteroids.length==0 && enemies.length==0 && !gameOver)
     gameOver = true;
     // draw text
     drawInfoText(
-      '         G A M E    O V E R \n\n Press spacebar play again',
+      gameOverTextString,
       520,
       200,
       32,
