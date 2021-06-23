@@ -459,6 +459,16 @@ function updateEnemy(enemy){
   if(game.rnd.integerInRange(1, 100)==1){
   enemy.velY*=-1;
   }
+  
+  if(!shipDestroyed && Collision(enemy,ship))
+  {
+    explosion(enemy.x,enemy.y);
+    enemies.splice(enemies.indexOf(enemy),1);
+    explosion(ship.x,ship.y);
+    shipDestroyed = true;
+    lives--;
+  }
+
   if(game.rnd.integerInRange(1, 100)==1){
      var bullet = initEnemyBullet(enemy);
      enemyBullets.push(bullet);
@@ -542,6 +552,14 @@ else{
   updateShip();
   drawShip();
     }
+    else {
+reSpawnTime--;
+if(reSpawnTime==0)
+{
+  shipDestroyed=false;
+  reSpawnTime=100;
+}
+  }
   updateScore();
   updateHighScore();
   drawLives();
@@ -586,15 +604,8 @@ if(asteroids.length==0 && enemies.length==0 && !gameOver)
   if (lives === 0 && !gameOver) {
     gameOver = true;
     // draw text
-    drawInfoText(
-      gameOverTextString,
-      520,
-      200,
-      32,
-      'rgb(255,0,0)',
-      'Impact',
-      0,
-    );
+    introText = 'G A M E  O V E R';
+    introText.visible = true;
 }
  
   if (game.cursors.left.isDown) Rotate(LEFT);
