@@ -18,6 +18,7 @@ let level = 1;
 let reSpawnTime = 100;
 let localStorageName = "Maxteroids";
 var gameStart = false;
+var gameRestart = false;
 var introTextSize = .01;
 var introText;
 var introText2;

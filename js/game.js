@@ -488,17 +488,17 @@ function updateShip(){
         ship.velY += Math.sin(ship.angle) * ship.speed;
     }
 
-    if (ship.x < ship.radius) {
+    if (ship.x < 0) {
         ship.x = game.width;
     }
     if (ship.x > game.width) {
-        ship.x = ship.radius;
+        ship.x = 0;
     }
-    if (ship.y < ship.radius) {
+    if (ship.y < 0) {
         ship.y = game.height;
     }
     if (ship.y > game.height) {
-        ship.y = ship.radius;
+        ship.y = 0;
     }
 
     ship.velX *= 0.99;
@@ -548,7 +548,7 @@ else{
   if(game.rnd.integerInRange(0, 100)==100)
     initEnemy();
 
-    if(!shipDestroyed){
+    if(!shipDestroyed && !gameOver){
   updateShip();
   drawShip();
     }
@@ -557,6 +557,8 @@ reSpawnTime--;
 if(reSpawnTime==0)
 {
   shipDestroyed=false;
+  ship.x = game.width/2;
+  ship.y = game.height/2;
   reSpawnTime=100;
 }
   }
@@ -597,22 +599,43 @@ asteroids.forEach(asteroid => {
 if(asteroids.length==0 && enemies.length==0 && !gameOver)
 {
   level++;
-  NumAsteroids+=2;
+  NumAsteroids=level+2;
   startLevel();
 }
 
   if (lives === 0 && !gameOver) {
     gameOver = true;
-    // draw text
-    introText = 'G A M E  O V E R';
+    introText.setText('G A M E  O V E R');
+    introText2.setText('PRESS SPACE BAR TO PLAY AGAIN');
     introText.visible = true;
-}
+    introText2.visible = true;
+    if (score > highScore)
+      highScore = score;
+    localStorage.setItem(localStorageName, highScore);
+    gameRestart = true;
+   }
  
-  if (game.cursors.left.isDown) Rotate(LEFT);
-  if (game.cursors.right.isDown) Rotate(RIGHT);
-  if (game.cursors.up.isDown) ship.movingForward = true;
-  if (game.cursors.up.isUp) ship.movingForward = false;
-  if (game.cursors.down.isDown) Hyperspace();
+if(gameRestart && game.fireButton.isDown) 
+{
+  gameRestart = false;
+  gameOver = false;
+  introText.visible = false;
+  introText2.visible = false;
+  enemies = [];
+  asteroids = [];
+  enemyBullets = [];
+  lives = 3;
+  level = 1;
+  score = 0;
+}
+
+   if(!gameOver){
+    if (game.cursors.left.isDown) Rotate(LEFT);
+    if (game.cursors.right.isDown) Rotate(RIGHT);
+    if (game.cursors.up.isDown) ship.movingForward = true;
+    if (game.cursors.up.isUp) ship.movingForward = false;
+    if (game.cursors.down.isDown) Hyperspace();
+    }
     }
   }
 
